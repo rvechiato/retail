@@ -1,0 +1,61 @@
+version: '3.3'
+
+services:
+  mysql:
+    image: mysql
+    container_name: dcs-mysql
+    # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    # (this is just an example, not intended to be a production configuration)
+    command: --default-authentication-plugin=caching_sha2_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    ports:
+      - 3306:3306
+    expose:
+      - '3306'
+    volumes:
+      - customerdb:/var/lib/mysql
+
+# POSTGRESS DATABASE AND PGAdmin
+  postgres:
+    image: postgres
+    container_name: dcs-postgres 
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "Postgres2024!"
+    ports:
+      - "5432:5432"       
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - postgres-network
+
+  pgadmin:  
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "pgadmin@email.com"
+      PGADMIN_DEFAULT_PASSWORD: "PgAdmin2024"
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - postgres-network
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+
+# Names our volume
+volumes:
+  customerdb:
+  pgadmin-data:
+  postgres:
+
+networks: 
+  postgres-network:
+    driver: bridge
+
+
